@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { getSources } from '@/app/actions/source'
 import SourcesClient from './sources-client'
 

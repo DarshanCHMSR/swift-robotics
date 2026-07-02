@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { getCountries } from '@/app/actions/country'
 import CountriesClient from './countries-client'
 

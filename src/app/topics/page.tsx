@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { getTopics } from '@/app/actions/topic'
 import TopicsClient from './topics-client'
 

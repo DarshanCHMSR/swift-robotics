@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { getCompetitors } from '@/app/actions/competitor'
 import CompetitorsClient from './competitors-client'
 
