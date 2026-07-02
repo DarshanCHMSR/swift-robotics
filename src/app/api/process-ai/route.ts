@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { GoogleGenAI } from '@google/genai'
@@ -23,7 +24,7 @@ export async function GET() {
           Analyze the following news article for an Economics News Monitoring Agent.
           
           Title: ${article.title}
-          Description/Content: ${article.content}
+          Description/Content: ${article.content ? article.content.substring(0, 1500) : ''}
           
           Provide the output as a valid JSON object with the following fields:
           - "summary": A brief 1-2 sentence summary.
