@@ -12,14 +12,19 @@ export default function ArchitecturePage() {
         <section className="bg-card p-6 rounded-xl border shadow-sm">
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
             <div className="bg-primary/10 p-2 rounded-lg text-primary">1</div>
-            Data Ingestion Layer
+            Data Ingestion Layer (Multi-Provider)
           </h2>
           <p className="text-muted-foreground mb-4">
-            The application fetches news from configured endpoints (like the Guardian API or RSS feeds). It runs on a scheduled basis (or manually for the MVP) and stores raw articles into the PostgreSQL database.
+            The application dynamically loads a suite of News Providers, fetching data concurrently via <code>Promise.all()</code>. Current active providers include:
           </p>
+          <ul className="list-disc pl-6 space-y-2 mb-4 text-sm text-muted-foreground">
+            <li><strong>The Guardian API:</strong> Fetches comprehensive news explicitly filtered for economic relevance.</li>
+            <li><strong>NewsAPI:</strong> A global aggregator mapping thousands of sources, querying dynamically based on your active Topics and Countries.</li>
+          </ul>
+          <p className="text-sm font-semibold text-slate-800 mb-2">Intelligent Deduplication:</p>
           <ul className="list-disc pl-6 space-y-2 text-sm text-muted-foreground">
-            <li>Prevents duplicates by matching unique article URLs.</li>
-            <li>Checks for relevant keywords configured in the "Topics" or "Competitors" sections.</li>
+            <li>Blocks duplicate ingestions via exact URL or exact Title matches.</li>
+            <li>Employs a custom <strong>Levenshtein distance</strong> string similarity algorithm to block articles if the title matches existing news with &gt;90% similarity.</li>
           </ul>
         </section>
 
