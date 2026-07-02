@@ -5,6 +5,31 @@ import DashboardClient from './dashboard-client'
 export const revalidate = 0
 
 export default async function Home() {
+  const [
+    totalArticles,
+    importantArticles,
+    noiseFiltered,
+    countriesCount,
+    sourcesCount,
+    topicsCount
+  ] = await Promise.all([
+    prisma.article.count(),
+    prisma.aiAnalysis.count({ where: { noise: false, importanceScore: { gte: 6 } } }),
+    prisma.aiAnalysis.count({ where: { noise: true } }),
+    prisma.country.count(),
+    prisma.source.count(),
+    prisma.topic.count()
+  ])
+
+  const stats = {
+    totalArticles,
+    importantArticles,
+    noiseFiltered,
+    countriesCount,
+    sourcesCount,
+    topicsCount
+  }
+
   const articles = await prisma.article.findMany({
     where: {
       aiAnalysis: {
@@ -41,7 +66,7 @@ export default async function Home() {
         </div>
       </div>
       
-      <DashboardClient initialArticles={serializedArticles as any} />
+      <DashboardClient initialArticles={serializedArticles as any} initialStats={stats} />
     </div>
   )
 }

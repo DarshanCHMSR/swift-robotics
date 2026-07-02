@@ -70,7 +70,10 @@ model AiAnalysis {
   importanceScore Int?     // 1-10
   category        String?
   sentiment       String?
-  reason          String?
-  noise           Boolean  @default(false)
-  processedAt     DateTime @default(now())
+  reason                String?
+  importanceReason      String?
+  matchedTopics         Json?
+  mentionedCompetitors  Json?
+  noise                 Boolean  @default(false)
+  processedAt           DateTime @default(now())
 }

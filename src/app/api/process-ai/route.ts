@@ -15,26 +15,50 @@ export async function GET() {
       where: { aiAnalysis: null },
       take: 10, // Process in small batches
     })
+    
+    if (unanalyzedArticles.length === 0) {
+      return NextResponse.json({ success: true, processed: 0 })
+    }
+
+    const enabledTopics = await prisma.topic.findMany({ where: { enabled: true } })
+    const enabledCompetitors = await prisma.competitor.findMany({ where: { enabled: true } })
+
+    const topicList = enabledTopics.map(t => t.name).join(', ')
+    const competitorList = enabledCompetitors.map(c => c.name).join(', ')
 
     let processed = 0
 
     for (const article of unanalyzedArticles) {
       try {
         const prompt = `
-          Analyze the following news article for an Economics News Monitoring Agent.
+          You are an elite Economics Intelligence Analyst.
+          Analyze the following news article.
+
+          Instructions:
+          - Ignore sports, celebrity news, entertainment, religion, and advertisements.
+          - Ignore politics unless economic impact exists.
+          - Ignore opinion articles without factual economic backing.
+          - Prioritize: GDP, Inflation, Central Banks, Trade, Employment, Manufacturing, Exports, Imports, Tax, Budget, Stock Markets, Currency, Oil Prices, Financial Regulations, Corporate Earnings, Global Economy.
+
+          Available Topics to Match: [${topicList}]
+          Available Competitors to Match: [${competitorList}]
           
           Title: ${article.title}
           Description/Content: ${article.content ? article.content.substring(0, 1500) : ''}
           
           Provide the output as a valid JSON object with the following fields:
-          - "summary": A brief 1-2 sentence summary.
-          - "importance_score": An integer from 1 to 10 rating the economic importance.
-          - "category": A single word or short phrase category (e.g. "Inflation", "Stock Market", "General").
-          - "sentiment": "Positive", "Negative", or "Neutral".
-          - "reason": A short sentence explaining why it is important (or why it's not).
-          - "noise": A boolean (true if the article is irrelevant, celebrity news, or pure marketing noise, false if it's actual economic/business news).
+          {
+            "summary": "A brief 1-2 sentence summary",
+            "importanceScore": 8, // An integer from 1 to 10
+            "importanceReason": "Explain WHY the article received that score. (e.g. 'This discusses an RBI rate cut which impacts inflation')",
+            "category": "A single word or short phrase category",
+            "sentiment": "Positive, Negative, or Neutral",
+            "noise": false, // true if irrelevant or ignored, false if valid economic news
+            "matchedTopics": ["List any topics from the Available Topics above that apply exactly"],
+            "mentionedCompetitors": ["List any competitors from the Available Competitors above that are mentioned"]
+          }
           
-          Return ONLY the JSON object, with no markdown formatting or extra text.
+          Return ONLY valid JSON. No markdown formatting or extra text.
         `
 
         const response = await ai.models.generateContent({
@@ -57,11 +81,14 @@ export async function GET() {
           data: {
             articleId: article.id,
             summary: result.summary,
-            importanceScore: result.importance_score,
+            importanceScore: result.importanceScore || result.importance_score || 0,
+            importanceReason: result.importanceReason || '',
             category: result.category,
             sentiment: result.sentiment,
-            reason: result.reason,
+            reason: '', // Obsolete field, kept for safety
             noise: result.noise === true || String(result.noise).toLowerCase() === 'true',
+            matchedTopics: result.matchedTopics || [],
+            mentionedCompetitors: result.mentionedCompetitors || [],
           }
         })
         processed++

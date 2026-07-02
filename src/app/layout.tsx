@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
 import "./globals.css";
-
-const font = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-});
 
 export const metadata: Metadata = {
   title: "Economics News Monitoring Agent",
@@ -25,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${font.variable} font-sans antialiased bg-slate-50`}
+        className="font-sans antialiased bg-slate-50"
       >
         <TooltipProvider>
           <SidebarProvider>
